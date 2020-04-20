@@ -1,0 +1,51 @@
+{
+    "variables" : {
+        "aws_access_key": "{{env `AWS_ACCESS_KEY`}}",
+        "aws_secret_key" : "{{env `AWS_SECRET_KEY`}}",
+        "azure_client_id": null,
+        "azure_secret": null,
+        "azure_subscription_id": null,
+        "azure_tenant": null
+    },
+    "builders": [
+      {
+        "type": "azure-arm",
+        "client_id": "{{user `azure_client_id`}}",
+        "client_secret": "{{user `azure_secret`}}",
+        "subscription_id": "{{user `azure_subscription_id`}}",
+        "tenant_id": "{{user `azure_tenant_id`}}",
+    
+        "resource_group_name": "packerdemo",
+        "storage_account": "pishotomachine",
+        "capture_container_name": "images",
+        "capture_name_prefix": "pishoto-{{timestamp}}",
+    
+        "os_type": "Linux",
+        "image_publisher": "Canonical",
+        "image_offer": "UbuntuServer",
+        "image_sku": "18.04-LTS",
+        "polling_duration_timeout": "40m",
+    
+        "azure_tags": {
+          "dept": "CLI"
+        },
+    
+        "location": "West US",
+        "vm_size": "Standard_A2"
+    }
+    ],
+  "provisioners": [{
+    "type": "ansible",
+    "playbook_file": "nginx.yml",
+    "extra_arguments": ["--extra-vars", "ansible_python_interpreter=/usr/bin/python3"]
+  }],
+  "post-processors": [{
+    "type": "manifest",
+    "output": "manifest.json",
+    "strip_path": true,
+    "custom_data": {
+      "my_custom_data": "example"
+    }
+  }
+  ]
+}
