@@ -1,0 +1,41 @@
+{
+    "variables" : {
+        "aws_access_key": "{{env `AWS_ACCESS_KEY`}}",
+        "aws_secret_key" : "{{env `AWS_SECRET_KEY`}}"
+    },
+    "builders": [{
+        "type":"amazon-ebs",
+        "instance_type": "t2.micro",
+        "access_key": "{{user `aws_access_key`}}",
+        "secret_key": "{{user `aws_secret_key`}}",
+        "region": "eu-west-2",
+        "ami_name": "pishoto-win-{{timestamp}}", 
+        "source_ami_filter": {
+          "filters": {
+            "virtualization-type": "hvm",
+            "name": "Windows_Server-2016-English-Full-Base*",
+            "root-device-type": "ebs"
+          },
+          "owners": ["801119661308"],
+          "most_recent": true
+        },
+        "user_data_file": "./files/enable_winrm.ps1",
+        "communicator": "winrm",
+        "winrm_insecure": true,
+        "winrm_username": "Administrator",
+        "winrm_use_ssl": true,
+        "disable_stop_instance": true
+    }],
+  "provisioners": [{
+    "type": "powershell",
+    "environment_vars": "WINRMPASS={{.WinRMPassword}}",
+    "inline": ["echo \"hello world\" | Out-File c:\\debug.txt"]
+  },
+  {
+    "type": "powershell",
+    "inline": [
+      "C:/ProgramData/Amazon/EC2-Windows/Launch/Scripts/InitializeInstance.ps1 -Schedule",
+      "C:/ProgramData/Amazon/EC2-Windows/Launch/Scripts/SysprepInstance.ps1"
+    ]
+  }]
+}
